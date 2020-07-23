@@ -9,7 +9,7 @@ def configuracao():
     arquivo = configparser.RawConfigParser()
     arquivo.read('config.txt')  
         
-    return {'op_binario_turbo': arquivo.get('GERAL', 'op_binario_turbo'),'op_digital': arquivo.get('GERAL', 'op_digital'),'op_binario': arquivo.get('GERAL', 'op_binario'),'seguir_ids': arquivo.get('GERAL', 'seguir_ids'),'stop_win': arquivo.get('GERAL', 'stop_win'), 'stop_loss': arquivo.get('GERAL', 'stop_loss'), 'payout': 0, 'banca_inicial': banca(), 'filtro_diferenca_sinal': arquivo.get('GERAL', 'filtro_diferenca_sinal'), 'martingale': arquivo.get('GERAL', 'martingale'), 'sorosgale': arquivo.get('GERAL', 'sorosgale'), 'niveis': arquivo.get('GERAL', 'niveis'), 'filtro_pais': arquivo.get('GERAL', 'filtro_pais'), 'filtro_top_traders': arquivo.get('GERAL', 'filtro_top_traders'), 'valor_minimo': arquivo.get('GERAL', 'valor_minimo'), 'paridade': arquivo.get('GERAL', 'paridade'), 'valor_entrada': arquivo.get('GERAL', 'valor_entrada'), 'timeframe': arquivo.get('GERAL', 'timeframe')}
+    return {'inverter_sinal': arquivo.get('GERAL', 'inverter_sinal'),'op_binario_turbo': arquivo.get('GERAL', 'op_binario_turbo'),'op_digital': arquivo.get('GERAL', 'op_digital'),'op_binario': arquivo.get('GERAL', 'op_binario'),'login': arquivo.get('GERAL', 'login'),'senha': arquivo.get('GERAL', 'senha'),'tipo_conta': arquivo.get('GERAL', 'tipo_conta'),'seguir_ids': arquivo.get('GERAL', 'seguir_ids'),'stop_win': arquivo.get('GERAL', 'stop_win'), 'stop_loss': arquivo.get('GERAL', 'stop_loss'), 'payout': 0, 'banca_inicial': banca(), 'filtro_diferenca_sinal': arquivo.get('GERAL', 'filtro_diferenca_sinal'), 'martingale': arquivo.get('GERAL', 'martingale'), 'sorosgale': arquivo.get('GERAL', 'sorosgale'), 'niveis': arquivo.get('GERAL', 'niveis'), 'filtro_pais': arquivo.get('GERAL', 'filtro_pais'), 'filtro_top_traders': arquivo.get('GERAL', 'filtro_top_traders'), 'valor_minimo': arquivo.get('GERAL', 'valor_minimo'), 'paridade': arquivo.get('GERAL', 'paridade'), 'valor_entrada': arquivo.get('GERAL', 'valor_entrada'), 'timeframe': arquivo.get('GERAL', 'timeframe')}
 
 logging.disable(level=(logging.DEBUG))
 init(convert=True, autoreset=True)
@@ -20,7 +20,7 @@ API.connect()
 API.change_balance('PRACTICE') # PRACTICE / REAL
  
 print(Fore.GREEN + '\nRobo Copy Modificado por Rafael Nogueira')
-print(Fore.GREEN + 'Versão: 1.4')
+print(Fore.GREEN + 'Versão: 1.5')
  
 while True: # Responsável pela conexão com a IQOPTION
     if API.check_connect() == False:
@@ -106,7 +106,10 @@ print('Delay Máximo:', str(config['filtro_diferenca_sinal']))
 print('País Selecionados:', str(config['filtro_pais']))
 print('Seguir Ranking:', str(config['filtro_top_traders']))
 print('Seguir Ids:', str(config['seguir_ids']))
-
+if config['inverter_sinal'] == 'S':
+    print(Fore.GREEN +'Inverter Entradas: SIM')  
+elif config['inverter_sinal'] == 'N':
+    print(Fore.GREEN + 'Inverter Entradas: NÃO') 
 print(Fore.YELLOW +'\n --> Gerenciamento')
 print('Stop Win:', str(config['stop_win']))
 print('Stop Loss:', str(config['stop_loss']))
@@ -273,7 +276,133 @@ while True: #CONFIG DA COPY
             print('Aguardando Resultado |' , Fore.GREEN + 'Sua Entrada:', Fore.GREEN + (config['valor_entrada']), Fore.YELLOW + '| Paridade:', Fore.YELLOW + (config['paridade']), Fore.YELLOW + '|', end='')
          
 
-            # 1 entrada
+        # Configuração Primeira Entrada
+        if config['inverter_sinal'] == 'S': # INVERTER SINAL
+            
+            if config['op_digital'] == 'S' and config['op_binario'] == 'N':
+                if trades[0]['instrument_dir'] == 'put':
+                    inverter = 'call'
+                elif trades[0]['instrument_dir'] == 'call':
+                    inverter = 'put'
+                resultado,lucro,stop = entradas(config, config['valor_entrada'], inverter, int(config['timeframe']))
+            elif config['op_binario'] == 'S' and config['op_digital'] == 'N': # BINARIO
+                if trades[0]['direction'] == 'put':
+                    inverter = 'call'
+                elif trades[0]['direction'] == 'call':
+                    inverter = 'put'    
+                resultado,lucro,stop = entradas(config, config['valor_entrada'], inverter, int(config['timeframe']))
+            if resultado == 'win':
+                    print(Fore.GREEN + ' Resultado: WIN |', Fore.GREEN + 'Lucro:', Fore.GREEN + str(lucro))
+                    print('=============================================================================================')
+                    print(Fore.GREEN + '                               Stop Win:', Fore.GREEN + str(config['stop_win']) ,'  |  ', Fore.RED + 'Stop Loss:' , Fore.RED + str(config['stop_loss']))
+                    print('=============================================================================================')
+            elif resultado == 'loss':
+                    print(Fore.RED + ' Resultado: LOSS |', Fore.RED + 'Lucro: -', Fore.RED + str(lucro))
+                    print('=============================================================================================')
+                    print(Fore.GREEN + '                               Stop Win:', Fore.GREEN + str(config['stop_win']) ,'  |  ', Fore.RED + 'Stop Loss:' , Fore.RED + str(config['stop_loss']))
+                    print('=============================================================================================')
+            else:
+                    print(Fore.YELLOW + 'ERRO AO REALIZAR A ENTRADA')
+                    print('=============================================================================================')
+                    print(Fore.GREEN + '                               Stop Win:', Fore.GREEN + str(config['stop_win']) ,'  |  ', Fore.RED + 'Stop Loss:' , Fore.RED + str(config['stop_loss']))
+                    print('=============================================================================================')
+            if stop:
+                if resultado == 'win':
+                    print(Fore.GREEN + 'Stop WIN Batido!')
+                else:
+                    print(Fore.RED + 'Stop LOSS Batido!')
+                sys.exit()
+              
+        
+            
+            # Configuração Martingale
+            if resultado == 'loss' and config['martingale'] == 'S':
+                valor_entrada = martingale('auto', float(config['valor_entrada']), float(config['payout']))
+                for i in range(int(config['niveis']) if int(config['niveis']) > 0 else 1):
+                    
+                    print('   MARTINGALE NIVEL '+str(i+1)+'..', end='')
+                    if config['op_digital'] == 'S' and config['op_binario'] == 'N':
+                        if trades[0]['instrument_dir'] == 'put':
+                            inverter = 'call'
+                        elif trades[0]['instrument_dir'] == 'call':
+                            inverter = 'put'
+                        resultado,lucro,stop = entradas(config, valor_entrada, inverter, int(config['timeframe']))
+                    elif config['op_binario'] == 'S' and config['op_digital'] == 'N': # BINARIO    
+                        if trades[0]['direction'] == 'put':
+                            inverter = 'call'
+                        elif trades[0]['direction'] == 'call':
+                            inverter = 'put'    
+                        resultado,lucro,stop = entradas(config, valor_entrada, inverter, int(config['timeframe']))
+                    if resultado == 'win':
+                        print(Fore.GREEN + ' Resultado: WIN | ', Fore.GREEN + 'Lucro:', Fore.GREEN + str(lucro))
+                        print('=======================================================================================================')
+                    if resultado == 'loss':
+                        print(Fore.RED + ' Resultado: LOSS | ', Fore.RED + 'Lucro: - ', Fore.RED + str(lucro))
+                        print('=======================================================================================================')
+                    if stop:
+                        if resultado.upper() == 'win':
+                            print(Fore.GREEN + 'Stop WIN Batido!')
+                        else:
+                            print(Fore.RED + 'Stop Loss Batido!')
+                        sys.exit()
+                    
+                    if resultado == 'win':
+                        break
+                    else:
+                        valor_entrada = martingale('auto', float(valor_entrada), float(config['payout']))
+                        
+            elif resultado == 'loss' and config['sorosgale'] == 'S': # Configuração SorosGale
+                
+                if float(config['valor_entrada']) > 5:
+                    
+                    lucro_total = 0
+                    lucro = 0
+                    perca = float(config['valor_entrada']) 
+                    # Nivel
+                    for i in range(int(config['niveis']) if int(config['niveis']) > 0 else 1):
+                        
+                        # Mao
+                        for i2 in range(2):
+                        
+                            if lucro_total >= perca:
+                                break
+                        
+                            print('   SOROSGALE NIVEL '+str(i+1)+' | MAO '+str(i2+1)+' | ', end='')
+                            
+                            # Entrada
+                            if config['op_digital'] == 'S' and config['op_binario'] == 'N':
+                                if trades[0]['instrument_dir'] == 'put':
+                                    inverter = 'call'
+                                elif trades[0]['instrument_dir'] == 'call':
+                                    inverter = 'put'
+                                resultado,lucro,stop = entradas(config, (perca / 2)+lucro, inverter, int(config['timeframe'])) 
+                            elif config['op_binario'] == 'S' and config['op_digital'] == 'N': # BINARIO
+                                if trades[0]['direction'] == 'put':
+                                    inverter = 'call'
+                                elif trades[0]['direction'] == 'call':
+                                    inverter = 'put'    
+                                resultado,lucro,stop = entradas(config, (perca / 2)+lucro, inverter, int(config['timeframe'])) 
+                            if resultado == 'win':
+                                print(Fore.GREEN + ' Resultado: WIN | ', Fore.GREEN + 'Lucro:', Fore.GREEN + str(lucro))
+                                print('=======================================================================================================')
+                            else:
+                                print(Fore.RED + ' Resultado: LOSS | ', Fore.RED + 'Lucro: - ', Fore.RED + str(lucro))
+                                print('=======================================================================================================')
+                            if stop:
+                                if resultado.upper() == 'win':
+                                    print(Fore.GREEN + 'Stop WIN Batido!')
+                                else:
+                                    print(Fore.RED + 'Stop Loss Batido!')
+                                sys.exit()
+                            
+                            if resultado == 'win':          
+                                lucro_total += lucro
+                            else:
+                                lucro_total = 0
+                                perca += perca / 2                              
+                                break                       
+            
+        elif config['inverter_sinal'] == 'N': # NÃO INVERTER SINAL    
             if config['op_digital'] == 'S' and config['op_binario'] == 'N':
                 resultado,lucro,stop = entradas(config, config['valor_entrada'], trades[0]['instrument_dir'], int(config['timeframe']))
             elif config['op_binario'] == 'S' and config['op_digital'] == 'N': # BINARIO
@@ -302,7 +431,7 @@ while True: #CONFIG DA COPY
               
         
             
-            # Martingale
+            # Configuração Martingale
             if resultado == 'loss' and config['martingale'] == 'S':
                 valor_entrada = martingale('auto', float(config['valor_entrada']), float(config['payout']))
                 for i in range(int(config['niveis']) if int(config['niveis']) > 0 else 1):
@@ -330,7 +459,7 @@ while True: #CONFIG DA COPY
                     else:
                         valor_entrada = martingale('auto', float(valor_entrada), float(config['payout']))
                         
-            elif resultado == 'loss' and config['sorosgale'] == 'S': # SorosGale
+            elif resultado == 'loss' and config['sorosgale'] == 'S': # Configuração SorosGale
                 
                 if float(config['valor_entrada']) > 5:
                     
@@ -371,7 +500,7 @@ while True: #CONFIG DA COPY
                             else:
                                 lucro_total = 0
                                 perca += perca / 2                              
-                                break                       
+                                break                   
             
 
         old = trades[0]['user_id']
