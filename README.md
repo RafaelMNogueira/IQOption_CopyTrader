@@ -42,4 +42,5 @@
 - filtro_top_traders: Nesse opção informa qual a posição do Rank quer copiar, por exemplo: se colocar 100 ele vai copiar os 100 primeiros do rank, caso queira todos, deixe em 0
 - filtro_diferenca_sinal: Nessa opção, você colocar o tempo máximo do delay entre a entrada do trader copiada e a sua. (Tempo em Segundos, recomendamos entre 2 e 10)
 - seguir_ids: Nessa opção você colocar o ID do trader que quer copiar, caso queira copiar do rank deixe em branco. Se for colocar mais de um ID usar apenas ",". Exemplo: 1234567,89012345
+- inverter_sinal:Função para inverter o SINAL, você deve marcar S ou N. 
 
