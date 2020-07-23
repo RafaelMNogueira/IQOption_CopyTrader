@@ -18,3 +18,4 @@ filtro_pais = todos
 filtro_top_traders = 0
 filtro_diferenca_sinal = 10
 seguir_ids = 
+inverter_sinal = N
