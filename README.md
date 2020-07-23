@@ -8,10 +8,11 @@
 - Download Python 3.7:https://www.python.org/downloads/
 - API Não Oficial: Eu utilizei uma modificação no stable_api.py para o funcionamento do check_win_v3 essa personalização foi disponibilizada pelo **IQ CODING **  (https://www.youtube.com/IQCoding/videos)
 
-**Principais Modificações realizadas no Código:**
+**Principais Modificações que realizei no Código:**
 - Inclusão do Copy Binário;
 - Inclusão de Cores;
 - Formação dos textos no Robo;
+- INVERTER A ENTRADA (v1.5 - 22/07/2020)
 
 **Configuração do Robo:**
 - Abrir o arquivo "CopyTrader.py" e modificar a linha 17 trocando a palavra "login" e "senha" pelo seu login e senha de acesso a IqOption.
