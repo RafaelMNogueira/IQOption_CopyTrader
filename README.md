@@ -13,6 +13,7 @@
 - Inclusão de Cores;
 - Formação dos textos no Robo;
 - INVERTER A ENTRADA (v1.5 - 22/07/2020)
+- CORREÇÃO E MELHORIAS MARTINGALE (v1.6 - 31/07/2020)
 
 **Configuração do Robo:**
 - Abrir o arquivo "CopyTrader.py" e modificar a linha 17 trocando a palavra "login" e "senha" pelo seu login e senha de acesso a IqOption.
@@ -29,6 +30,9 @@
 
 - timeframe: Tempo de Expiração da Vela na Operação;
 - martingale: Deve estar marcado S para realizar Martingale;
+- tipo_martingale = Deve estar marcado simples ou auto;
+*OBS: na opção simples o sistema calcula o valor de acordo com a taxa configurada em taxa_martingale e na opção auto o valor do martingale e calculado de acordo com o payout*.
+- taxa_martingale = Deve ser informado o valor para o calculo do martingale quando utilizado a opção simples em "tipo_martingale", o formato deve ser o seguinte: 2.2 , inclusive o valor recomendado e de 2.2;
 - sorosgale: Deve estar marcado S para realizar SorosGale;
 - niveis: Nivel do Martingale ou SorosGale
 
